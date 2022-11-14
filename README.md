@@ -1,72 +1,110 @@
 # Hosting a Full-Stack Application
 
-### **You can use you own project completed in previous courses or use the provided Udagram app for completing this final project.**
+## Description
+ this project is an application of hosting full stack application using 
+ aws services like rds for managing databases, s3 for hosting the frontend
+ and elastic benstalk for interaction between rds and s3
+ also we applied ci/cd using circle ci
 
----
+s3 live `http://abdallah-bucket-1.s3-website-us-east-1.amazonaws.com`
 
-In this project you will learn how to take a newly developed Full-Stack application built for a retailer and deploy it to a cloud service provider so that it is available to customers. You will use the aws console to start and configure the services the application needs such as a database to store product information and a web server allowing the site to be discovered by potential customers. You will modify your package.json scripts and replace hard coded secrets with environment variables in your code.
+## dependencie
+- aws-cli
 
-After the initial setup, you will learn to interact with the services you started on aws and will deploy manually the application a first time to it. As you get more familiar with the services and interact with them through a CLI, you will gradually understand all the moving parts.
+## AWS
 
-You will then register for a free account on CircleCi and connect your Github account to it. Based on the manual steps used to deploy the app, you will write a config.yml file that will make the process reproducible in CircleCi. You will set up the process to be executed automatically based when code is pushed on the main Github branch.
+### IAM Service Setup
 
-The project will also include writing documentation and runbooks covering the operations of the deployment process. Those runbooks will serve as a way to communicate with future developers and anybody involved in diagnosing outages of the Full-Stack application.
+- Create IAM user Service with `Administrator Access`
 
-# Udagram
+- Configure the aws cli user with your terminal via `aws configure`
 
-This application is provided to you as an alternative starter project if you do not wish to host your own code done in the previous courses of this nanodegree. The udagram application is a fairly simple application that includes all the major components of a Full-Stack web application.
+### S3 Service Setup
 
+- open terminal  and run the following to create s3 bucket
 
+```bash
+aws s3api create-bucket --bucket abdallah-bucket-1 --region us-east-1
+```
+- Set Bucket Policy for S3 Bucket
 
-### Dependencies
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "PublicReadGetObject",
+            "Effect": "Allow",
+            "Principal": "*",
+            "Action": [
+                "s3:GetObject"
+            ],
+            "Resource": [
+                "arn:aws:s3:::abdallah-bucket-1/*"
+            ]
+        }
+    ]
+}
 
 ```
-- Node v14.15.1 (LTS) or more recent. While older versions can work it is advisable to keep node to latest LTS version
+- in your s3 bucket properties go to static website hosing and enable it
 
-- npm 6.14.8 (LTS) or more recent, Yarn can work but was not tested for this project
+- you should have a url of s3 live `http://abdallah-bucket-1.s3-website-us-east-1.amazonaws.com`
 
-- AWS CLI v2, v1 can work but was not tested for this project
+- upload you static files by run deploy script
 
-- A RDS database running Postgres.
-
-- A S3 bucket for hosting uploaded pictures.
-
+```bash
+aws s3 sync build/ s3://abdallah-bucket-1
 ```
 
-### Installation
+### elastic benstalk
+- add .elasticbeanstalk/ to .gitignore file
+- Create an Elastic Beanstalk environment
+ 1. Intialize the eb with the eb init command.
+ 2. Create an environment running a sample application with the eb create command.
+ 3. set the environment variables using this command
+    ```bash
+       eb setenv AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID AWS_BUCKET=$AWS_BUCKET AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION AWS_PROFILE=$AWS_PROFILE AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY DB_PORT=$DB_PORT JWT_SECRET=$JWT_SECRET PORT=$PORT POSTGRES_DB=$POSTGRES_DB POSTGRES_HOST=$POSTGRES_HOST POSTGRES_PASSWORD=$POSTGRES_PASSWORD POSTGRES_USERNAME=$POSTGRES_USERNAME URL=$URL
+    ```
+ 4. Open config.yml in .elasticbeanstalk folder and add this
 
-Provision the necessary AWS services needed for running the application:
+```yml
+deploy:
+  artifact: ./www/Archive.zip
+```
+5. upload backend api using eb deploy.
 
-1. In AWS, provision a publicly available RDS database running Postgres. <Place holder for link to classroom article>
-1. In AWS, provision a s3 bucket for hosting the uploaded files. <Place holder for tlink to classroom article>
-1. Export the ENV variables needed or use a package like [dotnev](https://www.npmjs.com/package/dotenv)/.
-1. From the root of the repo, navigate udagram-api folder `cd starter/udagram-api` to install the node_modules `npm install`. After installation is done start the api in dev mode with `npm run dev`.
-1. Without closing the terminal in step 1, navigate to the udagram-frontend `cd starter/udagram-frontend` to intall the node_modules `npm install`. After installation is done start the api in dev mode with `npm run start`.
+# Steps to configure CircleCI with AWS S3, RDS and Elastic Beanstalk
 
-## Testing
+1. Create Circle CI Project
+2. Setup Environment Variables
 
-This project contains two different test suite: unit tests and End-To-End tests(e2e). Follow these steps to run the tests.
+| Name                  |                         Value                         |
+| --------------------- | :---------------------------------------------------: |
+| AWS_REGION            |  The AWS region you used to provision RDS, S3 and EB  |
+| AWS_ACCESS_KEY_ID      |                 Your AWS Access key ID               |
+| AWS_SECRET_ACCESS_KEY |              Your AWS secret Access key               |
+| AWS_S3_ENDPOINT       |             The url of the S3 hosted app.             |
+| AWS_REGION            |  The AWS region you used to provision RDS, S3 and EB  |
+| AWS_PROFILE           |                   Your AWS profile                    |
+| AWS_BUCKET            | The name of the S3 bucket used to host the front end  |
+| ----------------------|-------------------------------------------------------|
+| POSTGRES_HOST         |         The url of the RDS database instance          |
+| POSTGRES_DB           |                       postgres                        |
+| POSTGRES_USERNAME     | The username specified when creating the RDS instance |
+| POSTGRES_PASSWORD     | The password specified when creating the RDS instance |
+| DB_PORT               |  The port of the RDS db instance (5432 for postgres)  |
 
-1. `cd starter/udagram-frontend`
-1. `npm run test`
-1. `npm run e2e`
+3. configure the .circleci/config.yml by adding version, orbs, jobs, workflows
+4. add root level package.json
 
-There are no Unit test on the back-end
+## pipeline
 
-### Unit Tests:
-
-Unit tests are using the Jasmine Framework.
-
-### End to End Tests:
-
-The e2e tests are using Protractor and Jasmine.
-
-## Built With
-
-- [Angular](https://angular.io/) - Single Page Application Framework
-- [Node](https://nodejs.org) - Javascript Runtime
-- [Express](https://expressjs.com/) - Javascript API Framework
-
-## License
-
-[License](LICENSE.txt)
+ 1. create environment
+ 2. prepare environment variable
+ 3. install dependencies
+ 4. setting up elastic benstalk
+ 5. install aws-cli
+ 6. configue aws access key
+ 7. checkout code
+ 8. deploy code
