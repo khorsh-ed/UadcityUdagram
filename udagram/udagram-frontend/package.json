@@ -7,7 +7,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "deploy": "aws s3 cp --recursive  ./www s3://abdallah-bucket-1",
+    "deploy": "npm install -f && npm run build && chmod +x bin/deploy.sh && bash bin/deploy",
     "test": "ng test --watch=false",
     "lint": "ng lint",
     "e2e": "ng e2e"
