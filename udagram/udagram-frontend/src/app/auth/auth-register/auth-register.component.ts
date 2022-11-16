@@ -59,3 +59,4 @@ export class AuthRegisterComponent implements OnInit {
     return group.controls.password.value === group.controls.password_confirm.value ? null : { passwordsMisMatch: true };
   }
 }
+
