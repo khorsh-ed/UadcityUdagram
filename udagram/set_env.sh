@@ -8,4 +8,4 @@ export AWS_BUCKET=arn:aws:s3:::abdallah-bucket-1
 export AWS_REGION=us-east-1
 export AWS_PROFILE=default
 export JWT_SECRET=TOKENSECRET
-export URL=http://abdallah-bucket-1.s3-website-us-east-1.amazonaws.com
+export URL=udagram-backend.eba-heg233mj.us-east-1.elasticbeanstalk.com
