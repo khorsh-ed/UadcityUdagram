@@ -5,5 +5,5 @@
 - tslint
 - rxjs
 - eb-cli
-- aws-clo
+- aws-cli
 
